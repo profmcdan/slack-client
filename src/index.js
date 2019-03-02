@@ -9,6 +9,7 @@ import { ApolloClient } from "apollo-client";
 import { HttpLink } from "apollo-link-http";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloProvider } from "react-apollo";
+import "semantic-ui-css/semantic.min.css";
 
 // Create a client
 const client = new ApolloClient({
@@ -52,7 +53,6 @@ const Users = ({ onUserSelected }) => (
 const App = (
   <ApolloProvider client={client}>
     <Routes />
-    <Users />
   </ApolloProvider>
 );
 
