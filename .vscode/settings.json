@@ -1,0 +1,6 @@
+{
+  "javascript.referencesCodeLens.enabled": true,
+  "typescript.updateImportsOnFileMove.enabled": "never",
+  "typescript.suggestionActions.enabled": false,
+  "tslint.jsEnable": false
+}

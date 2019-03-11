@@ -1,4 +1,6 @@
-import React, { Component } from "react";
+import React from "react";
+import { extendObservable } from "mobx";
+import { observer } from "mobx-react";
 import {
   Container,
   Input,
@@ -10,15 +12,12 @@ import {
 import { Query, graphql } from "react-apollo";
 import gql from "graphql-tag";
 
-const registerMutation = gql`
-  mutation($username: String!, $email: String!, $password: String!) {
-    register(username: $username, email: $email, password: $password) {
+const loginMutation = gql`
+  mutation($email: String!, $password: String!) {
+    login(email: $email, password: $password) {
       ok
-      user {
-        id
-        email
-        username
-      }
+      token
+      refreshToken
       errors {
         path
         message
@@ -27,25 +26,36 @@ const registerMutation = gql`
   }
 `;
 
-class Register extends Component {
-  constructor() {
-    super();
-    this.state = {
-      username: "",
+class Login extends React.Component {
+  constructor(props) {
+    super(props);
+    extendObservable(this, {
       email: "",
       password: "",
-      usernameError: "",
       emailError: "",
       passwordError: "",
-      errors: []
-    };
+      err: {},
+      errorList: []
+    });
   }
+
+  onChange = e => {
+    const { name, value } = e.target;
+    this[name] = value;
+  };
 
   onSubmit = async e => {
     e.preventDefault();
-    const response = await this.props.mutate({ variables: this.state });
-    const { ok, errors } = response.data.register;
+    const { email, password } = this;
+    const response = await this.props.mutate({
+      variables: { email, password }
+    });
+    console.log(response);
+    const { ok, token, refreshToken, errors } = response.data.login;
     if (ok) {
+      // Save the tokens in local storage
+      localStorage.setItem("token", token);
+      localStorage.setItem("refreshToken", refreshToken);
       this.props.history.push("/");
     } else {
       const err = {},
@@ -56,42 +66,19 @@ class Register extends Component {
       errors.forEach(({ path, message }) => {
         errorList.push(message);
       });
-      this.errors = errors;
+      this.errors = errorList;
+      console.log(this.errors);
       // await this.setState(err);
       // await this.setState({ errors: errorList });
     }
   };
 
-  onChange = e => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value });
-  };
-
   render() {
-    const {
-      username,
-      email,
-      password,
-      emailError,
-      passwordError,
-      usernameError,
-      errors
-    } = this.state;
+    const { email, password, emailError, passwordError, errors } = this;
     return (
       <Container text>
-        <Header as="h2">Register</Header>
+        <Header as="h2">Login</Header>
         <Form onSubmit={this.onSubmit}>
-          <Form.Field>
-            <Input
-              fluid
-              error={!!usernameError}
-              type="text"
-              placeholder="Username"
-              value={username}
-              name="username"
-              onChange={this.onChange}
-            />
-          </Form.Field>
           <Form.Field>
             <Input
               fluid
@@ -116,7 +103,7 @@ class Register extends Component {
           </Form.Field>
           <Button type="submit">Submit</Button>
         </Form>
-        {usernameError || emailError || passwordError ? (
+        {emailError || passwordError ? (
           <Message
             error
             header="There are some errors with your submission"
@@ -128,4 +115,4 @@ class Register extends Component {
   }
 }
 
-export default graphql(registerMutation)(Register);
+export default graphql(loginMutation)(observer(Login));

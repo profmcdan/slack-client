@@ -1,22 +1,23 @@
 module.exports = {
   env: {
     browser: true,
-    commonjs: true,
-    es6: true
+    commonjs: false,
+    es6: 1
   },
-  extends: "eslint:recommended",
+  extends: "airbnb",
+  parser: "babel-eslint",
   parserOptions: {
     ecmaFeatures: {
       jsx: true
     },
-    ecmaVersion: 2016,
+    ecmaVersion: "es2016",
     sourceType: "module"
   },
   globals: {
     document: 1,
     console: 1
   },
-  plugins: ["react"],
+  plugins: ["react", "jsx-ally", "import"],
   rules: {
     indent: ["error", 2],
     "linebreak-style": ["error", "unix"],
